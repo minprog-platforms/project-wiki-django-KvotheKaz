@@ -6,7 +6,6 @@ from django.db import models
 from . import util
 
 
-
 class NewEntryForm(forms.Form):
     new_title = forms.CharField(label="Title")
     new_content = forms.CharField(label="Content")
@@ -32,10 +31,13 @@ def new_entry(request):
         form = NewEntryForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data["new_title"]
-            content = form.cleaned_data["new_content"]
-            new_entry = util.save_entry(title, content)
-            return render(request, "encyclopedia/new.html", {
-                "new_entry": new_entry,
+            if util.get_entry(title):
+                return render(request, "encyclopedia/new_entry_error.html")
+            else:    
+                content = form.cleaned_data["new_content"]
+                new_entry = util.save_entry(title, content)
+                return render(request, "encyclopedia/new.html", {
+                    "new_entry": new_entry,
             })
         else:
             return render(request, "encyclopedia/new.html", {
